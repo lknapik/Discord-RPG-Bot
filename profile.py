@@ -7,6 +7,13 @@ class Profile():
         if not os.path.isfile('profiles.json'):
             with open('profiles.json', 'w'): pass
     
+    def checkForProfile(self, userID):
+        db = TinyDB('profiles.json')
+        if len(db.search(Query().userID == userID)) == 0:
+            return(False)
+        else:
+            return(True)
+
     def createProfile(self, userID):
         db = TinyDB('profiles.json')
         if len(db.search(Query().userID == userID)) == 0:
@@ -58,3 +65,12 @@ class Profile():
             content = content+stats
 
             return(content)
+
+    def updateSkill(self, userID, points, skill):
+        db = TinyDB('profile.json')
+        if((db.search(Query().userID == userID))['unspent'] < points):
+            return("Not enough skill points!")
+        else:
+            db.update(add('strength', points), Query().userID = userID)
+            db.update(subtract('unspent', points))
+            return("Success!")

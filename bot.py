@@ -35,7 +35,19 @@ async def newProfile():
     status = profile.createProfile(userID)
     await client.say(status)
 
-#Allows for the distribution of skill points after leveling up
+#Allows for the distribution of skill points after leveling up format of "spendPoints 3 int"
+@client.command()
+async def spendPoints(*args):
+    userID = client.user.id
+    if profile.checkForProfile(userID) == False:
+        await cleint.say("Profile does not exist, use newProfile to make one!")
+    if args[0] is not int:
+        await client.say("{} is not a number").format(args[0])
+    if args[1] is not in statsTerms:
+        await client.say("{} is not a skill").format(args[1])
+    else:
+        outcome = profile.updateSkill(userID, args[0], args[1])
+        await client.say(outcome)
 
 #Lets the user access a shop to buy new weapons or magics (price is lower based off charisma)
 
