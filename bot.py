@@ -39,11 +39,14 @@ async def newProfile():
 @client.command()
 async def spendPoints(*args):
     userID = client.user.id
+    statsTerms = ['str', 'strength', 'dex', 'dexterity', 
+                    'con', 'constitution', 'int', 'intelligence', 
+                    'wis', 'wisdom', 'cha', 'charisma']
     if profile.checkForProfile(userID) == False:
-        await cleint.say("Profile does not exist, use newProfile to make one!")
-    if args[0] is not int:
+        await client.say("Profile does not exist, use newProfile to make one!")
+    if isinstance(args[0], int):
         await client.say("{} is not a number").format(args[0])
-    if args[1] is not in statsTerms:
+    if (args[1] not in statsTerms):
         await client.say("{} is not a skill").format(args[1])
     else:
         outcome = profile.updateSkill(userID, args[0], args[1])
@@ -53,15 +56,20 @@ async def spendPoints(*args):
 
 
 #Lets the user train to level up without fighting (training is more efficient based off wisdom)
-
+@client.command()
+async def train():
+    userID = client.user.id 
+    response = profile.train(userID)
+    await client.say(response)
 
 #Display user's profile
 @client.command()
 async def stats():
     userID = client.user.id
     user = client.user.name
+    
     content = profile.getUserInfo(userID)
     em = discord.Embed(title="{}'s Profile".format(user), description = content, colour=0xDEADBF)
-    await client.say(em)
+    await client.say(embed=em)
 
 client.run(TOKEN)

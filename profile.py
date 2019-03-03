@@ -1,6 +1,9 @@
 import os
 from tinydb import TinyDB, Query
+from tinydb.operations import add, subtract, set
 import math
+import time
+import random
 class Profile():
 
     def __init__(self):
@@ -27,12 +30,13 @@ class Profile():
                         'wisdom': 0, 
                         'charisma': 0, 
                         'unspent': 10,
-                        'totalLevel': 1,
+                        'level': 1,
                         'totalExp': 0,
                         'gold': 100,
                         'meleeEquipment': "None",
                         'magicEquipment': "None",
-                        'defenseEquipment': "None"})
+                        'defenseEquipment': "None",
+                        'timeToTrain': 0})
             return("Profile created successfully, don't forget to spend your 10 skill points!")
         else:
             return("User already exists!")
@@ -44,11 +48,13 @@ class Profile():
         else:
             userInfo = {}
             userInfo = db.search(Query().userID == userID)
+            userInfo = userInfo[0]
+            print(userInfo)
             level = userInfo['level']
             health = userInfo['health']
             mana = userInfo['mana']
             gold = userInfo['gold']
-            xpToNext = (ceil((math.sqrt(userInfo['totalExp'])))**2)-userInfo['totalExp']
+            xpToNext = (math.ceil((math.sqrt(userInfo['totalExp'])))**2)-userInfo['totalExp']
             unspent = userInfo['unspent']
             melee = userInfo['meleeEquipment']
             magic = userInfo['magicEquipment']
@@ -67,10 +73,46 @@ class Profile():
             return(content)
 
     def updateSkill(self, userID, points, skill):
-        db = TinyDB('profile.json')
-        if((db.search(Query().userID == userID))['unspent'] < points):
+        db = TinyDB('profiles.json')
+        userInfo = {}
+        userInfo = db.search(Query().userID == userID)
+        userInfo = userInfo[0]
+        points = int(points)
+        if(userInfo['unspent'] < points):
             return("Not enough skill points!")
         else:
-            db.update(add('strength', points), Query().userID = userID)
-            db.update(subtract('unspent', points))
+            db.update(add('strength', points), Query().userID == userID)
+            db.update(subtract('unspent', points), Query().userID == userID)
             return("Success!")
+    
+
+    def train(self, userID):
+        db = TinyDB('profiles.json')
+        userInfo = {}
+        userInfo = db.search(Query().userID == userID)
+        userInfo = userInfo[0]
+        trainTime = userInfo['timeToTrain']
+        timeSince = int(time.time()) - trainTime
+        if timeSince < 600:
+            return("Please wait {} seconds.".format(600-timeSince))
+        else:
+            charisma = userInfo['charisma']
+            expGain = random.randint(1,5)+(charisma*random.randint(1,5))
+            db.update(add('totalExp', expGain), Query().userID == userID)
+            db.update(set('timeToTrain', int(time.time())), Query().userID == userID)
+            self.levelCheck(userID)
+            return("Gained {} Exp Points!".format(expGain))
+
+        
+    def levelCheck(self,userID):
+        db = TinyDB('profiles.json')
+        userInfo = {}
+        userInfo = db.search(Query().userID == userID)
+        userInfo = userInfo[0]
+        totalExp = userInfo['totalExp']
+        currentLevel = userInfo['level']
+        newLevel = math.floor(math.sqrt(totalExp))+1
+        if newLevel > currentLevel:
+            db.update(set('level', math.floor(math.sqrt(totalExp))+1), Query().userID == userID)
+            db.update(add('unspent', 2), Query().userID == userID)
+    
