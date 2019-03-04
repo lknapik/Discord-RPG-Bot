@@ -2,8 +2,12 @@ import discord
 from discord.ext import commands
 import profile as pf
 
-TOKEN = 'MzI2NTAzNDI5MDY3Mzc0NjAy.D1oFxQ.lzUDmu46mgs8Da6_qjg3vgiaOrg'
+#Gain bot's token, stored in seperate file for security
+f = open('token.txt', 'r')
+TOKEN = f.read()
+f.close()
 
+#Set bot's prefix
 client = commands.Bot(command_prefix = ".")
 
 profile = pf.Profile()
