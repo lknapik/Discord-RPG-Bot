@@ -10,6 +10,14 @@ class Profile():
         if not os.path.isfile('profiles.json'):
             with open('profiles.json', 'w'): pass
     
+    def getUser(self, userID):
+        db = TinyDB('profiles.json')
+        userInfo = {}
+        userInfo = db.search(Query().userID == userID)
+        userInfo = userInfo[0]
+        return(userInfo, db)
+
+
     def checkForProfile(self, userID):
         db = TinyDB('profiles.json')
         if len(db.search(Query().userID == userID)) == 0:
@@ -46,10 +54,7 @@ class Profile():
         if len(db.search(Query().userID == userID)) == 0:
             return("No profile created, use newProfile to make one!")
         else:
-            userInfo = {}
-            userInfo = db.search(Query().userID == userID)
-            userInfo = userInfo[0]
-            print(userInfo)
+            userInfo, db = self.getUser(userID)
             level = userInfo['level']
             health = userInfo['health']
             mana = userInfo['mana']
@@ -66,38 +71,45 @@ class Profile():
             wisdom = userInfo['wisdom']
             charisma = userInfo['charisma']
 
-            content = "```Level: {} Health: {}  Mana: {}  Gold: {} \n XP to Next: {} Unspent Skillpoints: {} \n Melee: {}  Magic: {}  Armor: {} \n".format(level, health, mana, gold, xpToNext, unspent, melee, magic, defense)
-            stats = "Strength: {} Dexterity: {} \n Constitution: {}  Intelligence: {} \n Wisdom: {}  Charisma: {}```".format(strength, dexterity, constitution, intelligence, wisdom, charisma)
+            content = "```Level: {} XP to Next: {}\n Unspent Skillpoints: {}\n Health: {}  Mana: {}  Gold: {}\n Melee: {}  Magic: {}  Armor: {}\n".format(level, xpToNext, unspent, health, mana, gold, melee, magic, defense)
+            stats = "Strength: {} Dexterity: {}\n Constitution: {}  Intelligence: {}\n Wisdom: {}  Charisma: {}```".format(strength, dexterity, constitution, intelligence, wisdom, charisma)
             content = content+stats
 
             return(content)
 
     def updateSkill(self, userID, points, skill):
-        db = TinyDB('profiles.json')
-        userInfo = {}
-        userInfo = db.search(Query().userID == userID)
-        userInfo = userInfo[0]
+        userInfo, db = self.getUser(userID)
         points = int(points)
         if(userInfo['unspent'] < points):
             return("Not enough skill points!")
         else:
-            db.update(add('strength', points), Query().userID == userID)
+            skill = str(skill)
+            if(skill == 'str'):
+                skill = 'strength'
+            elif(skill == 'dex'):
+                skill = 'dexterity'
+            elif(skill == 'con'):
+                skill = 'constitution'
+            elif(skill == 'int'):
+                skill = 'intelligence'
+            elif(skill == 'wis'):
+                skill = 'wisdom'
+            elif(skill == 'cha'):
+                skill = 'charisma'
+            db.update(add(skill, points), Query().userID == userID)
             db.update(subtract('unspent', points), Query().userID == userID)
             return("Success!")
     
 
     def train(self, userID):
-        db = TinyDB('profiles.json')
-        userInfo = {}
-        userInfo = db.search(Query().userID == userID)
-        userInfo = userInfo[0]
+        userInfo, db = self.getUser(userID)
         trainTime = userInfo['timeToTrain']
         timeSince = int(time.time()) - trainTime
         if timeSince < 600:
             return("Please wait {} seconds.".format(600-timeSince))
         else:
-            charisma = userInfo['charisma']
-            expGain = random.randint(1,5)+(charisma*random.randint(1,5))
+            wisdom = userInfo['wisdom']
+            expGain = random.randint(1,5)+(wisdom*random.randint(1,5))
             db.update(add('totalExp', expGain), Query().userID == userID)
             db.update(set('timeToTrain', int(time.time())), Query().userID == userID)
             self.levelCheck(userID)
@@ -105,10 +117,7 @@ class Profile():
 
         
     def levelCheck(self,userID):
-        db = TinyDB('profiles.json')
-        userInfo = {}
-        userInfo = db.search(Query().userID == userID)
-        userInfo = userInfo[0]
+        userInfo, db = self.getUser(userID)
         totalExp = userInfo['totalExp']
         currentLevel = userInfo['level']
         newLevel = math.floor(math.sqrt(totalExp))+1
