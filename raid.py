@@ -9,6 +9,14 @@ class Raids():
     def __init__(self):
         if not os.path.isfile('raids.json'):
             with open('raids.json', 'w'): pass
+
+    def getRaid(self,userID):
+        db = TinyDB('raids.json')
+        raid = {}
+        raid = db.search(Query().userID == userID)
+        raid = raid[0]
+        return raid, db
+        
     
     def createRaid(self, userID):
         db = TinyDB('raids.json')
@@ -29,11 +37,13 @@ class Raids():
                         'enemyMagic': "none"})
             depth = 1
             self.formLevel(userID, depth)
+            return("Raid Created, use showRaid to view")
         else:
             return("Raid already created.")
     
     def formLevel(self, userID, depth):
         db = TinyDB('raids.json')
+        db.update(set('depth', depth), Query().userID == userID)
         #Set level type, 1-6 are battles, 7-8 are nothing, 9-10 are treasure rooms
         levelType = random.randint(1,10)
         #List of possible enemy types, no impact on stats as of now
@@ -50,3 +60,18 @@ class Raids():
         else:
             db.update(set('enemyRace', 'treasure'), Query().userID == userID)
             db.update(set('reward', math.ceil(0.5*depth*(random.randint(1,10)))), Query().userID == userID)
+
+    def getRaidInfo(self, userID):
+        content = ""
+        db = TinyDB('raids.json')
+        if len(db.search(Query().userID == userID)) == 0:
+            return("No raid created, use createRaid to make one!")
+        else:
+            raidInfo, db = self.getRaid(userID)
+            userHealth = raidInfo['health']
+            userMana = raidInfo['mana']
+            depth = raidInfo['depth']
+            enemyType = raidInfo['enemyRace']
+            enemyHealth = raidInfo['enemyHealth']
+            content = "```Current Health: {} Current Mana: {} Raid Depth: {}\nEnemy Type: {} Enemy Health: {}```".format(userHealth, userMana, depth, enemyType, enemyHealth)
+            return content

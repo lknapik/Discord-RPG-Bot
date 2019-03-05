@@ -44,7 +44,8 @@ class Profile():
                         'meleeEquipment': "None",
                         'magicEquipment': "None",
                         'defenseEquipment': "None",
-                        'timeToTrain': 0})
+                        'timeToTrain': 0,
+                        'timeToRaid': 0})
             return("Profile created successfully, don't forget to spend your 10 skill points!")
         else:
             return("User already exists!")

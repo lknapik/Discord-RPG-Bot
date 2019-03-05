@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 import profile as pf
+import raid as rd
+import combat as cb
 
 #Gain bot's token, stored in seperate file for security
 f = open('token.txt', 'r')
@@ -11,7 +13,8 @@ f.close()
 client = commands.Bot(command_prefix = ".")
 
 profile = pf.Profile()
-
+raid = rd.Raids()
+combat = cb.Combat()
 
 #Let serverhost know when the bot has first initalized
 @client.event
@@ -75,5 +78,43 @@ async def stats():
     content = profile.getUserInfo(userID)
     em = discord.Embed(title="{}'s Profile".format(user), description = content, colour=0xDEADBF)
     await client.say(embed=em)
+
+#Show current raid status
+@client.command()
+async def showRaid():
+    userID = client.user.id
+    user = client.user.name
+
+    content = raid.getRaidInfo(userID)
+    em = discord.Embed(title="{}'s Profile".format(user), description = content, content = 0xDEADBF)
+    await client.say(embed=em)
+
+#Create a new raid
+@client.command()
+async def createRaid():
+    userID = client.user.id
+    result = raid.createRaid(userID)
+    await client.say(result)
+
+#Run Away
+@client.command()
+async def raidRun():
+    userID = client.user.id
+    result = combat.runAway(userID)
+    await client.say(result)
+
+#Attack melee
+@client.command()
+async def raidMelee():
+    userID = client.user.id
+    result = combat.melee(userID)
+    await client.say(result)
+
+#Attack magic
+@client.command()
+async def raidMagic():
+    userID = client.user.id
+    result = combat.magic(userID)
+    await client.say(result)
 
 client.run(TOKEN)
