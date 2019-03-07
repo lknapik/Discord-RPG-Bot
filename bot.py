@@ -107,14 +107,14 @@ async def raidRun():
 @client.command()
 async def raidMelee():
     userID = client.user.id
-    result = combat.melee(userID)
+    result = combat.raidMelee(userID)
     await client.say(result)
 
 #Attack magic
 @client.command()
 async def raidMagic():
     userID = client.user.id
-    result = combat.magic(userID)
+    result = combat.raidMagic(userID)
     await client.say(result)
 
 client.run(TOKEN)

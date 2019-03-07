@@ -36,7 +36,12 @@ class Raids():
                         'enemyMelee': "none",
                         'enemyMagic': "none"})
             depth = 1
-            self.formLevel(userID, depth)
+            enemyTypes = ['Skeleton', 'Goblin', 'Zombie', 'Wisps', 'Lizard', 'Wolves']
+            db.update(set('enemyStrength', math.ceil(0.2*depth*(random.randint(1,10)))), Query().userID == userID)
+            db.update(set('enemyDexterity', math.ceil(0.2*depth*(random.randint(1,10)))), Query().userID == userID)
+            db.update(set('enemyIntelligence', math.ceil(0.2*depth*(random.randint(1,10)))), Query().userID == userID)
+            db.update(set('enemyRace', enemyTypes[random.randint(0,5)]), Query().userID == userID)
+            db.update(set('reward', (depth*random.randint(1,10))), Query().userID == userID)
             return("Raid Created, use showRaid to view")
         else:
             return("Raid already created.")
@@ -48,7 +53,7 @@ class Raids():
         levelType = random.randint(1,10)
         #List of possible enemy types, no impact on stats as of now
         enemyTypes = ['Skeleton', 'Goblin', 'Zombie', 'Wisps', 'Lizard', 'Wolves']
-        if(depth == 1 | levelType <= 6):
+        if(levelType <= 6):
             db.update(set('enemyStrength', math.ceil(0.2*depth*(random.randint(1,10)))), Query().userID == userID)
             db.update(set('enemyDexterity', math.ceil(0.2*depth*(random.randint(1,10)))), Query().userID == userID)
             db.update(set('enemyIntelligence', math.ceil(0.2*depth*(random.randint(1,10)))), Query().userID == userID)
@@ -57,7 +62,7 @@ class Raids():
         elif(levelType == 7 | levelType == 8):
             db.update(set('enemyRace', 'none'), Query().userID == userID)
             db.update(set('reward', 0), Query().userID == userID)
-        else:
+        elif(levelType == 9 | levelType == 10):
             db.update(set('enemyRace', 'treasure'), Query().userID == userID)
             db.update(set('reward', math.ceil(0.5*depth*(random.randint(1,10)))), Query().userID == userID)
 
