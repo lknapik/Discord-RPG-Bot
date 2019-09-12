@@ -41,9 +41,9 @@ class Profile():
                         'level': 1,
                         'totalExp': 0,
                         'gold': 100,
-                        'meleeEquipment': "None",
-                        'magicEquipment': "None",
-                        'defenseEquipment': "None",
+                        'meleeEquipment': "none",
+                        'magicEquipment': "none",
+                        'defenseEquipment': "none",
                         'timeToTrain': 0,
                         'timeToRaid': 0})
             return("Profile created successfully, don't forget to spend your 10 skill points!")
@@ -60,7 +60,7 @@ class Profile():
             health = userInfo['health']
             mana = userInfo['mana']
             gold = userInfo['gold']
-            xpToNext = (math.ceil((math.sqrt(userInfo['totalExp'])))**2)-userInfo['totalExp']
+            xpToNext = (math.ceil((math.sqrt(userInfo['totalExp']+100)))**2)-userInfo['totalExp']
             unspent = userInfo['unspent']
             melee = userInfo['meleeEquipment']
             magic = userInfo['magicEquipment']
@@ -121,8 +121,8 @@ class Profile():
         userInfo, db = self.getUser(userID)
         totalExp = userInfo['totalExp']
         currentLevel = userInfo['level']
-        newLevel = math.floor(math.sqrt(totalExp))+1
+        newLevel = math.floor(math.sqrt(totalExp+100))+1
         if newLevel > currentLevel:
-            db.update(set('level', math.floor(math.sqrt(totalExp))+1), Query().userID == userID)
+            db.update(set('level', math.floor(math.sqrt(totalExp+100))+1), Query().userID == userID)
             db.update(add('unspent', 2), Query().userID == userID)
     

@@ -46,8 +46,10 @@ class Raids():
         else:
             return("Raid already created.")
     
-    def formLevel(self, userID, depth):
+    #This automatically increases depth, dont do it anywhere else
+    def formLevel(self, userID):
         db = TinyDB('raids.json')
+        depth += 1
         db.update(set('depth', depth), Query().userID == userID)
         #Set level type, 1-6 are battles, 7-8 are nothing, 9-10 are treasure rooms
         levelType = random.randint(1,10)
@@ -80,3 +82,29 @@ class Raids():
             enemyHealth = raidInfo['enemyHealth']
             content = "```Current Health: {} Current Mana: {} Raid Depth: {}\nEnemy Type: {} Enemy Health: {}```".format(userHealth, userMana, depth, enemyType, enemyHealth)
             return content
+    
+    def nextLevel(self, userID):
+        raid, raidDB = self.getRaid(userID)
+        profileUser, profileDB = pf.getProfile(userID)
+        if (raid['enemyHealth'] > 0):
+            return("An enemy stands in your way")
+        elif(raid['enemyType'] == 'none'):
+            raidDB.update(set('health', profileUser['health']), Query().userID == userID)
+            raidDB.update(set('mana', profileUser['mana']), Query().userID == userID)
+            self.formLevel(userID)
+            return("You move to the next room")
+        elif(raid['enemyType'] == 'treasure'):
+            reward = raid['reward']
+            profileDB.update(add('gold', reward), Query().userID == userID) 
+            raidDB.update(set('health', profileUser['health']), Query().userID == userID)
+            raidDB.update(set('mana', profileUser['mana']), Query().userID == userID)
+            self.formLevel(userID)
+            return("Collected {} gold, and moved to the next room".format(reward))
+        else:
+            raidDB.update(set('health', profileUser['health']), Query().userID == userID)
+            raidDB.update(set('mana', profileUser['mana']), Query().userID == userID)
+            self.formLevel(userID)
+            return("You move to the next room")
+    
+    def resetRaid(self, userID):
+        raidDB.remove(where('userID') == userID)

@@ -48,18 +48,13 @@ class Combat:
         enemyType = raidUser['enemyRace']
         reward = raidUser['reward']
         if(enemyHealth <= 0):
-            raidDB.update(set('health', profileUser['health']), Query().userID == userID)
-            raidDB.update(set('mana', profileUser['mana']), Query().userID == userID)
-            profileDB.update(add('totalExp', reward), Query().userID == userID)
-            profile.levelCheck(userID)
-            depth += 1
-            raid.formLevel(userID, depth)
+            raid.nextLevel(userID)
             return("You killed the {} and gained {} exp".format(enemyType, reward))
         elif(health <= 0):
             raidDB.update(set('health', profileUser['health']), Query().userID == userID)
             raidDB.update(set('mana', profileUser['mana']), Query().userID == userID)
             depth += 1
-            raid.createRaid(userID)
+            raid.resetRaid(userID)
             return("You died and retured to the top of the dungeon")
         else:
             return("You did {} points of damage, the enemy returned with {} points of damage.".format(damage, enemyDamage))
@@ -79,18 +74,11 @@ class Combat:
         enemyType = raidUser['enemyRace']
         reward = raidUser['reward']
         if(enemyHealth <= 0):
-            raidDB.update(set('health', profileUser['health']), Query().userID == userID)
-            raidDB.update(set('mana', profileUser['mana']), Query().userID == userID)
             profileDB.update(add('totalExp', reward), Query().userID == userID)
             profile.levelCheck(userID)
-            depth += 1
-            raid.formLevel(userID, depth)
             return("You killed the {} and gained {} exp".format(enemyType, reward))
         elif(health <= 0):
-            raidDB.update(set('health', profileUser['health']), Query().userID == userID)
-            raidDB.update(set('mana', profileUser['mana']), Query().userID == userID)
-            depth += 1
-            raid.createRaid(userID)
+            raid.resetRaid(userID)
             return("You died and retured to the top of the dungeon")
         else:
             return("You did {} points of damage, the enemy returned with {} points of damage.".format(damage, enemyDamage))
@@ -117,6 +105,7 @@ class Combat:
         weaponStats = {}
         weaponStats = weaponDB.search((Query()['name'] == str(weapon)) & (Query()['type'] == 'melee'))
         weaponStats = weaponStats[0]
+        print(weaponStats)
         boost = weaponStats['stats']
         total = strength + boost
         damage = math.ceil(0.2*total*random.randint(1,5))
