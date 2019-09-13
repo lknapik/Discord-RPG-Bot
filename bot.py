@@ -106,7 +106,7 @@ async def createRaid(ctx):
 @client.command()
 async def raidRun(ctx):
     userID = client.user.id
-    result = combat.runAway(userID)
+    result = combat.raidRun(userID)
     await ctx.send(result)
 
 #Attack melee

@@ -1,5 +1,5 @@
 import raid as rd 
-from tinydb import TinyDB, Query
+from tinydb import TinyDB, Query, where
 from tinydb.operations import set, add, subtract
 import profile as pf
 import os
@@ -27,8 +27,7 @@ class Combat:
         userDex = profileUser['dexterity']
         chanceToRun = (userDex/enemyDex)
         if(chanceToRun > random.random()):
-            depth += 1
-            raid.formLevel(userID, depth)
+            raid.formLevel(userID)
             return("Successufully Ran")
         else:
             enemyDamage = self.enemyTurn(userID)
@@ -48,15 +47,17 @@ class Combat:
         enemyType = raidUser['enemyRace']
         reward = raidUser['reward']
         if(enemyHealth <= 0):
+            raidDB.update(set('enemyHealth', enemyHealth))
             raid.nextLevel(userID)
             return("You killed the {} and gained {} exp".format(enemyType, reward))
         elif(health <= 0):
             raidDB.update(set('health', profileUser['health']), Query().userID == userID)
             raidDB.update(set('mana', profileUser['mana']), Query().userID == userID)
-            depth += 1
             raid.resetRaid(userID)
             return("You died and retured to the top of the dungeon")
         else:
+            raidDB.update(set('health', health))
+            raidDB.update(set('enemyHealth', enemyHealth))
             return("You did {} points of damage, the enemy returned with {} points of damage.".format(damage, enemyDamage))
 
     def raidMagic(self, userID):
@@ -67,7 +68,7 @@ class Combat:
         intellligence = profileUser['intelligence']
         weapon = profileUser['magicEquipment']
         mana = raidUser['mana']
-        damage = self.calcMana(intellligence, weapon, mana)
+        damage = self.calcMagic(intellligence, weapon, mana)
         enemyDamage = self.enemyTurn(userID)
         health = raidUser['health'] - enemyDamage
         enemyHealth = raidUser['enemyHealth'] - damage
@@ -76,6 +77,7 @@ class Combat:
         if(enemyHealth <= 0):
             profileDB.update(add('totalExp', reward), Query().userID == userID)
             profile.levelCheck(userID)
+            raid.nextLevel(userID)
             return("You killed the {} and gained {} exp".format(enemyType, reward))
         elif(health <= 0):
             raid.resetRaid(userID)
